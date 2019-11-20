@@ -38,5 +38,12 @@
                 throw error;
             }
         }
+        
+        let sensor = new Accelerometer();
+  sensor.addEventListener('reading', function(e) {
+    document.getElementById('status').innerHTML = 'x: ' + e.target.x + ' y: ' + e.target.y + ' z: ' + e.target.z;
+    console.log(e.target);
+  });
+  sensor.start();
     </script>
 </html>
