@@ -8,28 +8,44 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     </head>
     <body>
+        <button id="my-button"></button>
         <div id="test"></div>
     </body>
     <script>
-        let options = {};
-        options.acceptAllDevices = true;
+        document.querySelector('#my-button').addEventListener('click', function (event) {
+            // Permissions must be requested from inside a user gesture, like a button's
+            // click handler.
+            chrome.permissions.request({
+                permissions: ['tabs'],
+                origins: ['http://www.google.com/']
+            }, function (granted) {
+                // The callback argument will be true if the user granted the permissions.
+                if (granted) {
+                    let options = {};
+                    options.acceptAllDevices = true;
 
-        navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,
-            optionalServices: ['battery_service']
-        })
-                .then(device => {
-                    // Human-readable name of the device.
-                    console.log(device.name);
-                    $('#test').append('<p>'+device.name+'</p>');
-                    // Attempts to connect to remote GATT Server.
-                    return device.gatt.connect();
-                })
-                .then(server => { /* ... */
-                })
-                .catch(error => {
-                    $('#test').append('<p>'+error+'</p>');
-                    console.log(error);
-                });
+                    navigator.bluetooth.requestDevice({
+                        acceptAllDevices: true,
+                        optionalServices: ['battery_service']
+                    })
+                            .then(device => {
+                                // Human-readable name of the device.
+                                console.log(device.name);
+                                $('#test').append('<p>' + device.name + '</p>');
+                                // Attempts to connect to remote GATT Server.
+                                return device.gatt.connect();
+                            })
+                            .then(server => { /* ... */
+                            })
+                            .catch(error => {
+                                $('#test').append('<p>' + error + '</p>');
+                                console.log(error);
+                            });
+                } else {
+                    $('#test').append('<p>' + error + '</p>');
+                }
+            });
+        });
+
     </script>
 </html>
