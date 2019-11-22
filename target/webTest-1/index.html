@@ -9,8 +9,48 @@
     </head>
     <body>
         <div id="test"></div>
+        <p>
+            <button class="btn btn-lg btn-default" onclick="readBatteryLevel()">Read Bluetooth device's<br>battery level</button>
+        </p>
+
+        <p id="target"></p>
+
+        <p><small>Based on code snippets from <a href="https://developers.google.com/web/updates/2015/07/interact-with-ble-devices-on-the-web" target="_blank">Google Developers</a>.</small></p>
     </body>
     <script>
+        function readBatteryLevel() {
+            var $target = document.getElementById('target');
+
+            if (!('bluetooth' in navigator)) {
+                $target.innerText = 'Bluetooth API not supported.';
+                return;
+            }
+
+            navigator.bluetooth.requestDevice({
+                filters: [{
+                        services: ['battery_service']
+                    }]
+            })
+                    .then(function (device) {
+                        return device.gatt.connect();
+                    })
+                    .then(function (server) {
+                        return server.getPrimaryService('battery_service');
+                    })
+                    .then(function (service) {
+                        return service.getCharacteristic('battery_level');
+                    })
+                    .then(function (characteristic) {
+                        return characteristic.readValue();
+                    })
+                    .then(function (value) {
+                        $target.innerHTML = 'Battery percentage is <b>' + value.getUint8(0) + '</b>.';
+                    })
+                    .catch(function (error) {
+                        $target.innerText = error;
+                    });
+        }
+
         let options = {};
         options.acceptAllDevices = true;
 
@@ -21,14 +61,14 @@
                 .then(device => {
                     // Human-readable name of the device.
                     console.log(device.name);
-                    $('#test').append('<p>'+device.name+'</p>');
+                    $('#test').append('<p>' + device.name + '</p>');
                     // Attempts to connect to remote GATT Server.
                     return device.gatt.connect();
                 })
                 .then(server => { /* ... */
                 })
                 .catch(error => {
-                    $('#test').append('<p>'+error+'</p>');
+                    $('#test').append('<p>' + error + '</p>');
                     console.log(error);
                 });
     </script>
