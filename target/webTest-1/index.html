@@ -16,44 +16,73 @@
         <pre id="GFG_DOWN" style= 
              "color:green; font-size: 20px; font-weight: bold;"> 
         </pre> 
+        <pre id="GFG_DOWN2" style= 
+             "color:green; font-size: 20px; font-weight: bold;"> 
+        </pre> 
 
         <p><small>Based on code snippets from <a href="https://developers.google.com/web/updates/2015/07/interact-with-ble-devices-on-the-web" target="_blank">Google Developers</a>.</small></p>
     </body>
     <script>
         function readBatteryLevel() {
             var $target = document.getElementById('GFG_DOWN');
-
+            var $target1 = document.getElementById('GFG_DOWN2');
             if (!('bluetooth' in navigator)) {
                 $target.innerText = 'Bluetooth API not supported.';
                 return;
             }
 
-            navigator.bluetooth.requestDevice({
+//            navigator.bluetooth.requestDevice({
+//                acceptAllDevices: true,
+//                optionalServices: ['battery_service']
+//            })
+//                    .then(function (device) {
+////                        function gfg_Run() {
+////                            $target.innerHTML = JSON.stringify(device, undefined, 4);
+////                        }
+////                        $target.innerText = JSON.stringify(device);
+//                        return device.gatt.connect();
+//                    })
+//                    .then(function (server) {
+//                        return server.getPrimaryService('battery_service');
+//                    })
+//                    .then(function (service) {
+//                        return service.getCharacteristic('battery_level');
+//                    })
+//                    .then(function (characteristic) {
+//                        return characteristic.readValue();
+//                    })
+//                    .then(function (value) {
+//                        $target.innerHTML = 'Battery percentage is <b>' + value.getUint8(0) + '</b>.';
+//                    })
+//                    .catch(function (error) {
+//                        $target.innerText = error;
+//                    });
+
+            const scan =  navigator.bluetooth.requestDevice({
                 acceptAllDevices: true,
                 optionalServices: ['battery_service']
-            })
-                    .then(function (device) {
-//                        function gfg_Run() {
-//                            $target.innerHTML = JSON.stringify(device, undefined, 4);
-//                        }
-//                        $target.innerText = JSON.stringify(device);
-                        return device.gatt.connect();
-                    })
-                    .then(function (server) {
-                        return server.getPrimaryService('battery_service');
-                    })
-                    .then(function (service) {
-                        return service.getCharacteristic('battery_level');
-                    })
-                    .then(function (characteristic) {
-                        return characteristic.readValue();
-                    })
-                    .then(function (value) {
-                        $target.innerHTML = 'Battery percentage is <b>' + value.getUint8(0) + '</b>.';
-                    })
-                    .catch(function (error) {
-                        $target.innerText = error;
-                    });
+            });
+
+            $target.innerHTML = 'Scan started with:  acceptAllAdvertisements: ' + scan.acceptAllAdvertisements
+                    + " active: " + scan.active + " keepRepeatedDevices: " + scan.keepRepeatedDevices;
+
+            navigator.bluetooth.addEventListener('advertisementreceived', event => {
+                $target1.innerHTML ='Advertisement received.  Device Name: ' + JSON.stringify(event)
+                    
+                event.manufacturerData.forEach((valueDataView, key) => {
+                    logDataView('Manufacturer', key, valueDataView);
+                });
+                event.serviceData.forEach((valueDataView, key) => {
+                    logDataView('Service', key, valueDataView);
+                });
+            });
+
+            setTimeout(stopScan, 10000);
+//            function stopScan() {
+//                log('Stopping scan...');
+//                scan.stop();
+//                log('Stopped.  scan.active = ' + scan.active);
+//            }
         }
 
 
