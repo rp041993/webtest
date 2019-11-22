@@ -13,13 +13,15 @@
             <button class="btn btn-lg btn-default" onclick="readBatteryLevel()">Read Bluetooth device's<br>battery level</button>
         </p>
 
-        <p id="target"></p>
+        <pre id="GFG_DOWN" style= 
+             "color:green; font-size: 20px; font-weight: bold;"> 
+        </pre> 
 
         <p><small>Based on code snippets from <a href="https://developers.google.com/web/updates/2015/07/interact-with-ble-devices-on-the-web" target="_blank">Google Developers</a>.</small></p>
     </body>
     <script>
         function readBatteryLevel() {
-            var $target = document.getElementById('target');
+            var $target = document.getElementById('GFG_DOWN');
 
             if (!('bluetooth' in navigator)) {
                 $target.innerText = 'Bluetooth API not supported.';
@@ -31,7 +33,11 @@
                 optionalServices: ['battery_service']
             })
                     .then(function (device) {
-                        $target.innerText = JSON.stringify(device);
+                        alert(JSON.stringify(device));
+                        function gfg_Run() {
+                            $target.innerHTML = JSON.stringify(device, undefined, 4);
+                        }
+//                        $target.innerText = JSON.stringify(device);
 //                        return device.gatt.connect();
                     })
                     .then(function (server) {
@@ -51,25 +57,6 @@
                     });
         }
 
-        let options = {};
-        options.acceptAllDevices = true;
 
-        navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,
-            optionalServices: ['battery_service']
-        })
-                .then(device => {
-                    // Human-readable name of the device.
-                    console.log(device.name);
-                    $('#test').append('<p>' + device.name + '</p>');
-                    // Attempts to connect to remote GATT Server.
-                    return device.gatt.connect();
-                })
-                .then(server => { /* ... */
-                })
-                .catch(error => {
-                    $('#test').append('<p>' + error + '</p>');
-                    console.log(error);
-                });
     </script>
 </html>
