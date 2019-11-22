@@ -33,24 +33,23 @@
                 optionalServices: ['battery_service']
             })
                     .then(function (device) {
-                        alert(JSON.stringify(device));
-                        function gfg_Run() {
-                            $target.innerHTML = JSON.stringify(device, undefined, 4);
-                        }
+//                        function gfg_Run() {
+//                            $target.innerHTML = JSON.stringify(device, undefined, 4);
+//                        }
 //                        $target.innerText = JSON.stringify(device);
-//                        return device.gatt.connect();
+                        return device.gatt.connect();
                     })
                     .then(function (server) {
-//                        return server.getPrimaryService('battery_service');
+                        return server.getPrimaryService('battery_service');
                     })
                     .then(function (service) {
-//                        return service.getCharacteristic('battery_level');
+                        return service.getCharacteristic('battery_level');
                     })
                     .then(function (characteristic) {
-//                        return characteristic.readValue();
+                        return characteristic.readValue();
                     })
                     .then(function (value) {
-//                        $target.innerHTML = 'Battery percentage is <b>' + value.getUint8(0) + '</b>.';
+                        $target.innerHTML = 'Battery percentage is <b>' + value.getUint8(0) + '</b>.';
                     })
                     .catch(function (error) {
                         $target.innerText = error;
