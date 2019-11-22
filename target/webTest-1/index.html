@@ -8,43 +8,20 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     </head>
     <body>
-        <h1>Hello World!</h1>
+        <div id="test"></div>
     </body>
     <script>
-        let accelerometer = null;
-        try {
-            accelerometer = new Accelerometer({referenceFrame: 'device'});
-            accelerometer.addEventListener('error', event => {
-                // Handle runtime errors.
-                if (event.error.name === 'NotAllowedError') {
-                    // Branch to code for requesting permission.
-                } else if (event.error.name === 'NotReadableError') {
-                    alert('Cannot connect to the sensor.');
-                    console.log('Cannot connect to the sensor.');
-                }
-            });
-            accelerometer.addEventListener('reading', () => reloadOnShake(accelerometer));
-            accelerometer.start();
-        } catch (error) {
-            // Handle construction errors.
-            if (error.name === 'SecurityError') {
-                // See the note above about feature policy.
-                console.log('Sensor construction was blocked by a feature policy.');
-                alert('Sensor construction was blocked by a feature policy.');
-            } else if (error.name === 'ReferenceError') {
-                console.log('Sensor is not supported by the User Agent.');
-                alert('Sensor is not supported by the User Agent.');
-            } else {
-                throw error;
-            }
-        }
-        
-        let sensor = new Accelerometer();
-  sensor.addEventListener('reading', function(e) {
-      console.log(e);
-    document.getElementById('status').innerHTML = 'x: ' + e.target.x + ' y: ' + e.target.y + ' z: ' + e.target.z;
-    console.log(e.target);
-  });
-  sensor.start();
+        let options = {};
+        options.acceptAllDevices = true;
+
+        navigator.bluetooth.requestDevice(options).then(function (device) {
+            $( "#test" ).append( "<p>"+device.name+"</p>" );
+            console.log('Name: ' + device.name);
+            // Do something with the device.
+        })
+                .catch(function (error) {
+                    $( "#test" ).append( "<p>Something went wrong</p>" );
+                    console.log("Something went wrong. " + error);
+                });
     </script>
 </html>
