@@ -31,7 +31,7 @@
                 optionalServices: ['battery_service']
             })
                     .then(function (device) {
-                        $target.innerText = device;
+                        $target.innerText = JSON.stringify(device);
 //                        return device.gatt.connect();
                     })
                     .then(function (server) {
