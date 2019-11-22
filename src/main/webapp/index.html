@@ -21,14 +21,14 @@
                 .then(device => {
                     // Human-readable name of the device.
                     console.log(device.name);
-                    $('#test').append(device.name);
+                    $('#test').append('<p>'+device.name+'</p>');
                     // Attempts to connect to remote GATT Server.
                     return device.gatt.connect();
                 })
                 .then(server => { /* ... */
                 })
                 .catch(error => {
-                    $('#test').append(error);
+                    $('#test').append('<p>'+error+'</p>');
                     console.log(error);
                 });
     </script>
