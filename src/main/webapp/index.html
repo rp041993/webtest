@@ -19,129 +19,127 @@
     </head>
 
     <body>
-        <div id="test"></div>
-        <p>
-            <button class="btn btn-lg btn-default" onclick="readBatteryLevel()">Read Bluetooth device's<br>battery level</button>
-        </p>
+
         <footer >
-            <pre id="GFG_DOWN" style= 
-                 "color:green; font-size: 20px; font-weight: bold;"> 
-            </pre> 
-            <pre id="GFG_DOWN2" style= 
-                 "color:green; font-size: 20px; font-weight: bold;"> 
-            </pre> 
+
+            <button id="read">Connect with BLE device</button>
+            <button id="start" disabled>Start</button>
+            <button id="stop" disabled>Stop</button>
+
         </footer>
-        <p><small>Based on code snippets from <a href="https://developers.google.com/web/updates/2015/07/interact-with-ble-devices-on-the-web" target="_blank">Google Developers</a>.</small></p>
     </body>
+
     <script>
-        function readBatteryLevel() {
-            var $target = document.getElementById('GFG_DOWN');
-            var $target1 = document.getElementById('GFG_DOWN2');
-            if (!('bluetooth' in navigator)) {
-                $target.innerText = 'Bluetooth API not supported.';
-                return;
+        var deviceName = 'Palm'
+        var bleService = 'environmental_sensing'
+        var bleCharacteristic = 'uv_index'
+        var bluetoothDeviceDetected
+        var gattCharacteristic
+
+        document.querySelector('#read').addEventListener('click', function () {
+            if (isWebBluetoothEnabled()) {
+                read()
+            }
+        })
+
+        document.querySelector('#start').addEventListener('click', function (event) {
+            if (isWebBluetoothEnabled()) {
+                start()
+            }
+        })
+
+        document.querySelector('#stop').addEventListener('click', function (event) {
+            if (isWebBluetoothEnabled()) {
+                stop()
+            }
+        })
+
+        function isWebBluetoothEnabled() {
+            if (!navigator.bluetooth) {
+                console.log('Web Bluetooth API is not available in this browser!')
+                return false
             }
 
-//            navigator.bluetooth.requestDevice({
-//                acceptAllDevices: true,
-//                optionalServices: ['battery_service']
-//            })
-//                    .then(function (device) {
-////                        function gfg_Run() {
-////                            $target.innerHTML = JSON.stringify(device, undefined, 4);
-////                        }
-////                        $target.innerText = JSON.stringify(device);
-//                        return device.gatt.connect();
-//                    })
-//                    .then(function (server) {
-//                        return server.getPrimaryService('battery_service');
-//                    })
-//                    .then(function (service) {
-//                        return service.getCharacteristic('battery_level');
-//                    })
-//                    .then(function (characteristic) {
-//                        return characteristic.readValue();
-//                    })
-//                    .then(function (value) {
-//                        $target.innerHTML = 'Battery percentage is <b>' + value.getUint8(0) + '</b>.';
-//                    })
-//                    .catch(function (error) {
-//                        $target.innerText = error;
-//                    });
-
-//            let serviceUuid = document.querySelector('#service').value;
-//            if (serviceUuid.startsWith('0x')) {
-//                serviceUuid = parseInt(serviceUuid);
-//            }
-
-//            let characteristicUuid = document.querySelector('#characteristic').value;
-//            if (characteristicUuid.startsWith('0x')) {
-//                characteristicUuid = parseInt(characteristicUuid);
-//            }
-
-//            log('Requesting Bluetooth Device...');
-            navigator.bluetooth.requestDevice({
-                acceptAllDevices: true,
-                optionalServices: ['battery_service']
-            })
-                    .then(device => {
-                        $target.innerText = 'Connecting to GATT Server...';
-                        $target1.innerText =JSON.stringify(device) 
-                        return device.gatt.connect();
-                    })
-                    .then(server => {
-//                        log('Getting Service...');
-                        $target.innerText = 'Getting Service...';
-                        $target1.innerText =JSON.stringify(server.getPrimaryService()) 
-                        return server.getPrimaryService();
-                    })
-                    .then(service => {
-//                        log('Getting Characteristics...');
-                        $target.innerText = JSON.stringify(service.getCharacteristics());
-//                        if (characteristicUuid) {
-                        // Get all characteristics that match this UUID.
-//                            return service.getCharacteristics(characteristicUuid);
-//                        }
-                        // Get all characteristics.
-                        return service.getCharacteristics();
-                    })
-                    .then(characteristics => {
-//                        log('> Characteristics: ' +
-//                                characteristics.map(c => c.uuid).join('\n' + ' '.repeat(19)));
-                    })
-                    .catch(error => {
-//                        log('Argh! ' + error);
-                    });
-
-
-
-//            const scan =  navigator.bluetooth.requestDevice({
-//                acceptAllDevices: true,
-//                optionalServices: ['battery_service']
-//            });
-//
-//            $target.innerHTML = 'Scan started with:  acceptAllAdvertisements: ' + scan.acceptAllAdvertisements
-//                    + " active: " + scan.active + " keepRepeatedDevices: " + scan.keepRepeatedDevices;
-//
-//            navigator.bluetooth.addEventListener('advertisementreceived', event => {
-//                $target1.innerHTML ='Advertisement received.  Device Name: ' + JSON.stringify(event)
-//                    
-//                event.manufacturerData.forEach((valueDataView, key) => {
-//                    logDataView('Manufacturer', key, valueDataView);
-//                });
-//                event.serviceData.forEach((valueDataView, key) => {
-//                    logDataView('Service', key, valueDataView);
-//                });
-//            });
-//
-//            setTimeout(stopScan, 10000);
-//            function stopScan() {
-//                log('Stopping scan...');
-//                scan.stop();
-//                log('Stopped.  scan.active = ' + scan.active);
-//            }
+            return true
         }
 
+        function getDeviceInfo() {
+            let options = {
+                acceptAllDevice:true
+            }
 
+            console.log('Requesting any Bluetooth Device...')
+            return navigator.bluetooth.requestDevice(options).then(device => {
+                bluetoothDeviceDetected = device
+            }).catch(error => {
+                console.log('Argh! ' + error)
+            })
+        }
+
+        function read() {
+            return (bluetoothDeviceDetected ? Promise.resolve() : getDeviceInfo())
+                    .then(connectGATT)
+                    .then(_ => {
+                        console.log('Reading UV Index...')
+                        return gattCharacteristic.readValue()
+                    })
+                    .catch(error => {
+                        console.log('Waiting to start reading: ' + error)
+                    })
+        }
+
+        function connectGATT() {
+            if (bluetoothDeviceDetected.gatt.connected && gattCharacteristic) {
+                return Promise.resolve()
+            }
+
+            return bluetoothDeviceDetected.gatt.connect()
+                    .then(server => {
+                        console.log('Getting GATT Service...')
+                        return server.getPrimaryService()
+                    })
+                    .then(service => {
+                        console.log('Getting GATT Characteristic...')
+                        return service.getCharacteristic(bleCharacteristic)
+                    })
+                    .then(characteristic => {
+                        gattCharacteristic = characteristic
+                        gattCharacteristic.addEventListener('characteristicvaluechanged',
+                                handleChangedValue)
+                        document.querySelector('#start').disabled = false
+                        document.querySelector('#stop').disabled = true
+                    })
+        }
+
+        function handleChangedValue(event) {
+            let value = event.target.value.getUint8(0)
+            var now = new Date()
+            console.log('> ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds() + ' UV Index is ' + value)
+        }
+
+        function start() {
+            gattCharacteristic.startNotifications()
+                    .then(_ => {
+                        console.log('Start reading...')
+                        document.querySelector('#start').disabled = true
+                        document.querySelector('#stop').disabled = false
+                    })
+                    .catch(error => {
+                        console.log('[ERROR] Start: ' + error)
+                    })
+        }
+
+        function stop() {
+            gattCharacteristic.stopNotifications()
+                    .then(_ => {
+                        console.log('Stop reading...')
+                        document.querySelector('#start').disabled = false
+                        document.querySelector('#stop').disabled = true
+                    })
+                    .catch(error => {
+                        console.log('[ERROR] Stop: ' + error)
+                    })
+        }
     </script>
+
 </html>
