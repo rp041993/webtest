@@ -6,20 +6,31 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <style>
+            footer{
+                position: fixed;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                color: white;
+                text-align: center;
+            }
+        </style>
     </head>
+
     <body>
         <div id="test"></div>
         <p>
             <button class="btn btn-lg btn-default" onclick="readBatteryLevel()">Read Bluetooth device's<br>battery level</button>
         </p>
-
-        <pre id="GFG_DOWN" style= 
-             "color:green; font-size: 20px; font-weight: bold;"> 
-        </pre> 
-        <pre id="GFG_DOWN2" style= 
-             "color:green; font-size: 20px; font-weight: bold;"> 
-        </pre> 
-
+        <footer >
+            <pre id="GFG_DOWN" style= 
+                 "color:green; font-size: 20px; font-weight: bold;"> 
+            </pre> 
+            <pre id="GFG_DOWN2" style= 
+                 "color:green; font-size: 20px; font-weight: bold;"> 
+            </pre> 
+        </footer>
         <p><small>Based on code snippets from <a href="https://developers.google.com/web/updates/2015/07/interact-with-ble-devices-on-the-web" target="_blank">Google Developers</a>.</small></p>
     </body>
     <script>
@@ -74,18 +85,21 @@
                 optionalServices: ['battery_service']
             })
                     .then(device => {
-//                        log('Connecting to GATT Server...');
+                        $target.innerText = 'Connecting to GATT Server...';
+                        $target1.innerText =JSON.stringify(device) 
                         return device.gatt.connect();
                     })
                     .then(server => {
 //                        log('Getting Service...');
-                        return server.getPrimaryService(serviceUuid);
+                        $target.innerText = 'Getting Service...';
+                        $target1.innerText =JSON.stringify(server) 
+                        return 'server.getPrimaryService(serviceUuid)';
                     })
                     .then(service => {
 //                        log('Getting Characteristics...');
-                        $target.innerText =JSON.stringify(service.getCharacteristics());
+                        $target.innerText = JSON.stringify(service.getCharacteristics());
 //                        if (characteristicUuid) {
-                            // Get all characteristics that match this UUID.
+                        // Get all characteristics that match this UUID.
 //                            return service.getCharacteristics(characteristicUuid);
 //                        }
                         // Get all characteristics.
