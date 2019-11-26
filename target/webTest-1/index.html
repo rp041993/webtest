@@ -58,26 +58,69 @@
 //                        $target.innerText = error;
 //                    });
 
-            const scan =  navigator.bluetooth.requestDevice({
+//            let serviceUuid = document.querySelector('#service').value;
+//            if (serviceUuid.startsWith('0x')) {
+//                serviceUuid = parseInt(serviceUuid);
+//            }
+
+//            let characteristicUuid = document.querySelector('#characteristic').value;
+//            if (characteristicUuid.startsWith('0x')) {
+//                characteristicUuid = parseInt(characteristicUuid);
+//            }
+
+            log('Requesting Bluetooth Device...');
+            navigator.bluetooth.requestDevice({
                 acceptAllDevices: true,
                 optionalServices: ['battery_service']
-            });
+            })
+                    .then(device => {
+//                        log('Connecting to GATT Server...');
+                        return device.gatt.connect();
+                    })
+                    .then(server => {
+//                        log('Getting Service...');
+                        return server.getPrimaryService(serviceUuid);
+                    })
+                    .then(service => {
+//                        log('Getting Characteristics...');
+                        $target.innerText =JSON.stringify(service.getCharacteristics());
+//                        if (characteristicUuid) {
+                            // Get all characteristics that match this UUID.
+//                            return service.getCharacteristics(characteristicUuid);
+//                        }
+                        // Get all characteristics.
+                        return service.getCharacteristics();
+                    })
+                    .then(characteristics => {
+//                        log('> Characteristics: ' +
+//                                characteristics.map(c => c.uuid).join('\n' + ' '.repeat(19)));
+                    })
+                    .catch(error => {
+//                        log('Argh! ' + error);
+                    });
 
-            $target.innerHTML = 'Scan started with:  acceptAllAdvertisements: ' + scan.acceptAllAdvertisements
-                    + " active: " + scan.active + " keepRepeatedDevices: " + scan.keepRepeatedDevices;
 
-            navigator.bluetooth.addEventListener('advertisementreceived', event => {
-                $target1.innerHTML ='Advertisement received.  Device Name: ' + JSON.stringify(event)
-                    
-                event.manufacturerData.forEach((valueDataView, key) => {
-                    logDataView('Manufacturer', key, valueDataView);
-                });
-                event.serviceData.forEach((valueDataView, key) => {
-                    logDataView('Service', key, valueDataView);
-                });
-            });
 
-            setTimeout(stopScan, 10000);
+//            const scan =  navigator.bluetooth.requestDevice({
+//                acceptAllDevices: true,
+//                optionalServices: ['battery_service']
+//            });
+//
+//            $target.innerHTML = 'Scan started with:  acceptAllAdvertisements: ' + scan.acceptAllAdvertisements
+//                    + " active: " + scan.active + " keepRepeatedDevices: " + scan.keepRepeatedDevices;
+//
+//            navigator.bluetooth.addEventListener('advertisementreceived', event => {
+//                $target1.innerHTML ='Advertisement received.  Device Name: ' + JSON.stringify(event)
+//                    
+//                event.manufacturerData.forEach((valueDataView, key) => {
+//                    logDataView('Manufacturer', key, valueDataView);
+//                });
+//                event.serviceData.forEach((valueDataView, key) => {
+//                    logDataView('Service', key, valueDataView);
+//                });
+//            });
+//
+//            setTimeout(stopScan, 10000);
 //            function stopScan() {
 //                log('Stopping scan...');
 //                scan.stop();
