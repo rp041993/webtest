@@ -92,8 +92,8 @@
                     .then(server => {
 //                        log('Getting Service...');
                         $target.innerText = 'Getting Service...';
-                        $target1.innerText =JSON.stringify(server) 
-                        return 'server.getPrimaryService(serviceUuid)';
+                        $target1.innerText =JSON.stringify(server.getPrimaryService()) 
+                        return server.getPrimaryService();
                     })
                     .then(service => {
 //                        log('Getting Characteristics...');
