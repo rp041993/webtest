@@ -72,7 +72,7 @@
 
             console.log('Requesting any Bluetooth Device...')
             return navigator.bluetooth.requestDevice(options).then(device => {
-                alert(JSON.stringify(device));
+                alert(JSON.stringify(device.name));
             $('p').append('<span id="add_here">'+device.name+'</span>');    
                 bluetoothDeviceDetected = device
             }).catch(error => {
