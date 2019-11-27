@@ -25,7 +25,7 @@
             <button id="read">Connect with BLE device</button>
             <button id="start" disabled>Start</button>
             <button id="stop" disabled>Stop</button>
-
+            <p>value: </p>
         </footer>
     </body>
 
@@ -35,8 +35,8 @@
         var bleCharacteristic = 'uv_index'
         var bluetoothDeviceDetected
         var gattCharacteristic
-
-
+        
+        
 
         document.querySelector('#read').addEventListener('click', function () {
             if (isWebBluetoothEnabled()) {
@@ -58,11 +58,6 @@
 
         function isWebBluetoothEnabled() {
             if (!navigator.bluetooth) {
-                chrome.bluetooth.getDevices(function (devices) {
-                    for (var i = 0; i < devices.length; i++) {
-                        alert(devices[i].address);
-                    }
-                });
                 console.log('Web Bluetooth API is not available in this browser!')
                 return false
             }
@@ -72,11 +67,12 @@
 
         function getDeviceInfo() {
             let options = {
-                acceptAllDevices: true
+                acceptAllDevices:true
             }
 
             console.log('Requesting any Bluetooth Device...')
             return navigator.bluetooth.requestDevice(options).then(device => {
+            $('p').append('<span id="add_here">'+device.name+'</span>');    
                 bluetoothDeviceDetected = device
             }).catch(error => {
                 console.log('Argh! ' + error)
