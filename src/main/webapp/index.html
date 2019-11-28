@@ -19,7 +19,8 @@
     </head>
 
     <body>
-
+<div id="map"> tag on the page to insert the map into
+ 
         <footer >
 
             <button id="read">Connect with BLE device</button>
@@ -30,6 +31,34 @@
     </body>
 
     <script>
+//        var accElem = document.getElementById('acceleration'),
+//    accGravityElem = document.getElementById('acceleration-gravity'),
+ 
+// Define an event handler function for processing the device’s acceleration values
+ 
+    handleDeviceMotionEvent = function(e) {
+ 
+        // Get the current acceleration values in 3 axes and find the greatest of these
+ 
+        var acc = e.acceleration,
+            maxAcc = Math.max(acc.x, acc.y, acc.z),
+ 
+        // Get the acceleration values including gravity and find the greatest of these
+ 
+            accGravity = e.accelerationIncludingGravity,
+            maxAccGravity = Math.max(accGravity.x, accGravity.y, accGravity.z);
+ 
+        // Output to the user the greatest current acceleration value in any axis, as
+        // well as the greatest value in any axis including the effect of gravity
+ alert(maxAcc);
+ alert(maxAccGravity);
+//        accElem.innerHTML = 'Current acceleration: ' + maxAcc +  'm/s^2';
+//        accGravityElem.innerHTML = 'Value incl. gravity: ' + maxAccGravity + 'm/s^2';
+    };
+ 
+// Assign the event handler function to execute when the device is moving
+ 
+window.addEventListener('devicemotion', handleDeviceMotionEvent, false);
         var deviceName = 'Palm'
         var bleService = 'environmental_sensing'
         var bleCharacteristic = 'uv_index'
@@ -39,11 +68,12 @@
 
         if (navigator.permissions) {
             // https://w3c.github.io/orientation-sensor/#model
-            Promise.all([navigator.permissions.query({name: "accelerometer"}),
-                navigator.permissions.query({name: "magnetometer"}),
-                navigator.permissions.query({name: "gyroscope"})])
+            Promise.all([
+                navigator.permissions.query({name: "magnetometer"})
+                ])
                     .then(results => {
                         if (results.every(result => result.state === "granted")) {
+                            alert("granted");
                             let sensor = new Magnetometer();
                             sensor.start();
 
