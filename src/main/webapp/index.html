@@ -36,16 +36,36 @@
         var bluetoothDeviceDetected
         var gattCharacteristic
 
-        let sensor = new Magnetometer();
-        sensor.start();
 
-        sensor.onreading = () => {
-            console.log("Magnetic field along the X-axis " + sensor.x);
-            console.log("Magnetic field along the Y-axis " + sensor.y);
-            console.log("Magnetic field along the Z-axis " + sensor.z);
-        };
+        if (navigator.permissions) {
+            // https://w3c.github.io/orientation-sensor/#model
+            Promise.all([navigator.permissions.query({name: "accelerometer"}),
+                navigator.permissions.query({name: "magnetometer"}),
+                navigator.permissions.query({name: "gyroscope"})])
+                    .then(results => {
+                        if (results.every(result => result.state === "granted")) {
+                            let sensor = new Magnetometer();
+                            sensor.start();
 
-        sensor.onerror = event => alert(event.error.name+"-"+ event.error.message);
+                            sensor.onreading = () => {
+                                alert("Magnetic field along the X-axis " + sensor.x);
+                                alert("Magnetic field along the Y-axis " + sensor.y);
+                                alert("Magnetic field along the Z-axis " + sensor.z);
+                            };
+
+                            sensor.onerror = event => alert(event.error.name + "-" + event.error.message);
+
+                        } else {
+                            alert("Permission to use sensor was denied.");
+                        }
+                    }).catch(err => {
+                alert("Integration with Permissions API is not enabled, still try to start app.");
+                initSensor();
+            });
+        } else {
+            alert("No Permissions API, still try to start app.");
+            initSensor();
+        }
 
 
         document.querySelector('#read').addEventListener('click', function () {
