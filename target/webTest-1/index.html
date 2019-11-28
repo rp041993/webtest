@@ -45,7 +45,7 @@
             console.log("Magnetic field along the Z-axis " + sensor.z);
         };
 
-        sensor.onerror = event => alert(event.error.name, event.error.message);
+        sensor.onerror = event => alert(event.error.name+"-"+ event.error.message);
 
 
         document.querySelector('#read').addEventListener('click', function () {
