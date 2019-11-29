@@ -1,209 +1,32 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Start Page</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-        <style>
-            footer{
-                position: fixed;
-                left: 0;
-                bottom: 0;
-                width: 100%;
-                color: white;
-                text-align: center;
-            }
-        </style>
-    </head>
+<head>
+  <title>Magnetometer Example | Generic Sensor API | mobiForge</title>  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Ruadhan O'Donoghue">
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h1>Magnetometer raw data</h1>
+  <p><a href="https://mobiforge.com/design-development/the-generic-sensor-api">The Generic Sensor API</a> on <a href="https://mobiforge.com">mobiForge.com</a></p>
+  <a href="index.html">< Back </a>
+  <div id="status">No data</div>
+  <div id="heading">No data</div>
 
-    <body>
-<div id="map"> tag on the page to insert the map into
- 
-        <footer >
+  <script>
+    let status = document.getElementById('status');
+    let heading = document.getElementById('heading');
+    if ( 'Magnetometer' in window ) {
+      let sensor = new Magnetometer();
+      sensor.addEventListener('reading', function(e) {
+        status.innerHTML = 'x: ' + e.target.x + '<br> y: ' + e.target.y + '<br> z: ' + e.target.z;
+        let headingDegrees = 'Heading: ' + Math.atan2(e.target.y, e.target.x) * (180 / Math.PI);
+        heading.innerHTML = headingDegrees;
+      });
+      sensor.start();
+    }
+    else status.innerHTML = 'Magnetometer not supported';
+  </script>
 
-            <button id="read">Connect with BLE device</button>
-            <button id="start" disabled>Start</button>
-            <button id="stop" disabled>Stop</button>
-            <p>value: </p>
-        </footer>
-    </body>
-
-    <script>
-//        var accElem = document.getElementById('acceleration'),
-//    accGravityElem = document.getElementById('acceleration-gravity'),
- 
-// Define an event handler function for processing the device’s acceleration values
- 
-    handleDeviceMotionEvent = function(e) {
- 
-        // Get the current acceleration values in 3 axes and find the greatest of these
- 
-        var acc = e.acceleration,
-            maxAcc = Math.max(acc.x, acc.y, acc.z),
- 
-        // Get the acceleration values including gravity and find the greatest of these
- 
-            accGravity = e.accelerationIncludingGravity,
-            maxAccGravity = Math.max(accGravity.x, accGravity.y, accGravity.z);
- 
-        // Output to the user the greatest current acceleration value in any axis, as
-        // well as the greatest value in any axis including the effect of gravity
- alert(maxAcc);
- alert(maxAccGravity);
-//        accElem.innerHTML = 'Current acceleration: ' + maxAcc +  'm/s^2';
-//        accGravityElem.innerHTML = 'Value incl. gravity: ' + maxAccGravity + 'm/s^2';
-    };
- 
-// Assign the event handler function to execute when the device is moving
- 
-window.addEventListener('devicemotion', handleDeviceMotionEvent, false);
-        var deviceName = 'Palm'
-        var bleService = 'environmental_sensing'
-        var bleCharacteristic = 'uv_index'
-        var bluetoothDeviceDetected
-        var gattCharacteristic
-
-
-        if (navigator.permissions) {
-            // https://w3c.github.io/orientation-sensor/#model
-            Promise.all([
-                navigator.permissions.query({name: "magnetometer"})
-                ])
-                    .then(results => {
-                        if (results.every(result => result.state === "granted")) {
-                            alert("granted");
-                            let sensor = new Magnetometer();
-                            sensor.start();
-
-                            sensor.onreading = () => {
-                                alert("Magnetic field along the X-axis " + sensor.x);
-                                alert("Magnetic field along the Y-axis " + sensor.y);
-                                alert("Magnetic field along the Z-axis " + sensor.z);
-                            };
-
-                            sensor.onerror = event => alert(event.error.name + "-" + event.error.message);
-
-                        } else {
-                            alert("Permission to use sensor was denied.");
-                        }
-                    }).catch(err => {
-                alert("Integration with Permissions API is not enabled, still try to start app.");
-                initSensor();
-            });
-        } else {
-            alert("No Permissions API, still try to start app.");
-            initSensor();
-        }
-
-
-        document.querySelector('#read').addEventListener('click', function () {
-            if (isWebBluetoothEnabled()) {
-                read()
-            }
-        })
-
-        document.querySelector('#start').addEventListener('click', function (event) {
-            if (isWebBluetoothEnabled()) {
-                start()
-            }
-        })
-
-        document.querySelector('#stop').addEventListener('click', function (event) {
-            if (isWebBluetoothEnabled()) {
-                stop()
-            }
-        })
-
-        function isWebBluetoothEnabled() {
-            if (!navigator.bluetooth) {
-                console.log('Web Bluetooth API is not available in this browser!')
-                return false
-            }
-
-            return true
-        }
-
-        function getDeviceInfo() {
-            let options = {
-                acceptAllDevices: true
-            }
-
-            console.log('Requesting any Bluetooth Device...')
-            return navigator.bluetooth.requestDevice(options).then(device => {
-                alert(JSON.stringify(device.name));
-                $('p').append('<span id="add_here">' + device.name + '</span>');
-                bluetoothDeviceDetected = device
-            }).catch(error => {
-                console.log('Argh! ' + error)
-            })
-        }
-
-        function read() {
-            return (bluetoothDeviceDetected ? Promise.resolve() : getDeviceInfo())
-                    .then(connectGATT)
-                    .then(_ => {
-                        console.log('Reading UV Index...')
-                        return gattCharacteristic.readValue()
-                    })
-                    .catch(error => {
-                        console.log('Waiting to start reading: ' + error)
-                    })
-        }
-
-        function connectGATT() {
-            if (bluetoothDeviceDetected.gatt.connected && gattCharacteristic) {
-                return Promise.resolve()
-            }
-
-            return bluetoothDeviceDetected.gatt.connect()
-                    .then(server => {
-                        console.log('Getting GATT Service...')
-                        return server.getPrimaryService()
-                    })
-                    .then(service => {
-                        console.log('Getting GATT Characteristic...')
-                        return service.getCharacteristic(bleCharacteristic)
-                    })
-                    .then(characteristic => {
-                        gattCharacteristic = characteristic
-                        gattCharacteristic.addEventListener('characteristicvaluechanged',
-                                handleChangedValue)
-                        document.querySelector('#start').disabled = false
-                        document.querySelector('#stop').disabled = true
-                    })
-        }
-
-        function handleChangedValue(event) {
-            let value = event.target.value.getUint8(0)
-            var now = new Date()
-            console.log('> ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds() + ' UV Index is ' + value)
-        }
-
-        function start() {
-            gattCharacteristic.startNotifications()
-                    .then(_ => {
-                        console.log('Start reading...')
-                        document.querySelector('#start').disabled = true
-                        document.querySelector('#stop').disabled = false
-                    })
-                    .catch(error => {
-                        console.log('[ERROR] Start: ' + error)
-                    })
-        }
-
-        function stop() {
-            gattCharacteristic.stopNotifications()
-                    .then(_ => {
-                        console.log('Stop reading...')
-                        document.querySelector('#start').disabled = false
-                        document.querySelector('#stop').disabled = true
-                    })
-                    .catch(error => {
-                        console.log('[ERROR] Stop: ' + error)
-                    })
-        }
-    </script>
-
+</body>
 </html>
